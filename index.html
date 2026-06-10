@@ -476,7 +476,7 @@
 // ============================================================
 // REPLACE THE VALUE BELOW WITH YOUR KIT API KEY
 // ============================================================
-const KIT_API_KEY = 'PASTE_YOUR_KIT_API_KEY_HERE';
+const KIT_API_KEY = 'PASTE_YOUR_KIT_API_KEY_HERE';kit_bae00a93fba272464d0940e711ba1222
 
 const TAG_IDS = {
   wayfinder:   19597291,
@@ -549,7 +549,7 @@ async function submitForm() {
 
   try {
     // Step 1 — Create or update subscriber in Kit
-    const subRes = await fetch('https://api.kit.com/v4/subscribers', {
+    const subRes = await fetch('/api/v4/subscribers', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -578,7 +578,7 @@ async function submitForm() {
 
     // Step 2 — Apply outcome tag to trigger Kit automation
     if(subId && tagId) {
-      await fetch('https://api.kit.com/v4/tags/' + tagId + '/subscribers', {
+      await fetch('/api/v4/tags/' + tagId + '/subscribers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
