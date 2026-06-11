@@ -473,18 +473,6 @@
 </div>
 
 <script>
-// ============================================================
-// REPLACE THE VALUE BELOW WITH YOUR KIT API KEY
-// ============================================================
-const KIT_API_KEY = 'kit_bae00a93fba272464d0940e711ba1222';
-
-const TAG_IDS = {
-  wayfinder:   19597291,
-  maker:       19597292,
-  torchbearer: 19597294,
-  pioneer:     19597295
-};
-
 const answers = { q1: null, q2: null, q2_book: '', q2_film: '', q3: null, q4: null, q5: null };
 
 function show(id) {
@@ -544,51 +532,31 @@ async function submitForm() {
 
   show('screen-loading');
   const outcome  = determineOutcome();
-  const tagId    = TAG_IDS[outcome];
   const nameParts = name.split(' ');
 
   try {
-    // Step 1 — Create or update subscriber in Kit
-    const subRes = await fetch('/api/v4/subscribers', {
+    // Submit to the secure Netlify Function, which talks to Kit
+    // server-side using the API key stored in an environment variable.
+    await fetch('/.netlify/functions/submit-quiz', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Kit-Api-Key': KIT_API_KEY
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email_address: email,
-        first_name:    nameParts[0],
-        fields: {
-          last_name:    nameParts.slice(1).join(' ') || '',
-          location:     location,
-          quiz_outcome: outcome,
-          q1_answer:    answers.q1     || '',
-          q2_answer:    answers.q2     || '',
-          q2_book:      answers.q2_book|| '',
-          q2_film:      answers.q2_film|| '',
-          q3_answer:    answers.q3     || '',
-          q4_answer:    answers.q4     || '',
-          q5_answer:    answers.q5     || '',
-        }
+        email:       email,
+        firstName:   nameParts[0],
+        lastName:    nameParts.slice(1).join(' ') || '',
+        location:    location,
+        quizOutcome: outcome,
+        q1:          answers.q1     || '',
+        q2:          answers.q2     || '',
+        q2Book:      answers.q2_book || '',
+        q2Film:      answers.q2_film || '',
+        q3:          answers.q3     || '',
+        q4:          answers.q4     || '',
+        q5:          answers.q5     || '',
       })
     });
-
-    const subData = await subRes.json();
-    const subId   = subData?.subscriber?.id;
-
-    // Step 2 — Apply outcome tag to trigger Kit automation
-    if(subId && tagId) {
-      await fetch('/api/v4/tags/' + tagId + '/subscribers', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Kit-Api-Key': KIT_API_KEY
-        },
-        body: JSON.stringify({ subscriber_id: subId })
-      });
-    }
   } catch(e) {
-    console.error('Kit API error:', e);
+    console.error('Quiz submission error:', e);
   }
 
   // Populate hidden fields for Netlify form notification
